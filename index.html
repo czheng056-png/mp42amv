@@ -50,11 +50,11 @@ button:disabled{opacity:0.5}
 
 <button id="go" disabled>开始转换</button>
 <div id="progress"><i></i></div>
-<div id="status">正在加载本地核心组件...</div>
+<div id="status">等待选择文件...</div>
 </div>
 
-<!-- 关键：引用你上传到 GitHub 的本地文件 -->
-<script src="./ffmpeg.min.js"></script>
+<!-- 使用绝对根路径加载 ffmpeg.min.js -->
+<script src="/ffmpeg.min.js"></script>
 <script>
 (function(){
 'use strict';
@@ -72,19 +72,21 @@ function setProgress(v){progEl.style.display='block';progBar.style.width=Math.ro
 // 初始化 FFmpeg (0.11.6 经典版 API)
 async function initFFmpeg(){
 if(loaded)return;
+setStatus('正在加载核心组件（约23MB，若卡住请耐心等待）...');
 try{
 var createFFmpeg=window.FFmpeg.createFFmpeg;
+// 动态获取当前网页的绝对路径，确保无论分配什么域名都能正确找到文件
+var baseUrl = window.location.origin;
 ffmpeg=createFFmpeg({
 log: false,
-// 指向同目录下的本地核心文件
-corePath: './ffmpeg-core.js'
+corePath: baseUrl + '/ffmpeg-core.js'
 });
 ffmpeg.setProgress(function(e){
 setProgress(e.ratio);
 });
 await ffmpeg.load();
 loaded=true;
-setStatus('本地核心组件加载完成，可以开始转换');
+setStatus('核心组件加载完成，可以开始转换');
 goBtn.disabled=false;
 }catch(e){
 var errMsg = e && e.message ? e.message : (e && e.toString ? e.toString() : '未知错误');
